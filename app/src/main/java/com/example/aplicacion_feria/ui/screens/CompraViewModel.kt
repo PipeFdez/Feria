@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 
 data class ItemCarrito(
     val producto: ProductoEntity,
+    val precioCobrado: Int,
     val cantidad: Double,
     val subtotal: Int
 )
@@ -49,7 +50,6 @@ class CompraViewModel(application: Application) : AndroidViewModel(application) 
 
     private fun precargarProductosSiEsNecesario() {
         viewModelScope.launch(Dispatchers.IO) {
-            // Verificamos si ya hay productos para no reinsertarlos en cada inicio
             val existentes = productoDao.getAllProductos().first()
             if (existentes.isEmpty()) {
                 val listaBase = listOf(
@@ -57,17 +57,18 @@ class CompraViewModel(application: Application) : AndroidViewModel(application) 
                     ProductoEntity(nombre = "Papas", precioBase = 1000, tipoVenta = TipoVenta.PESO),
                     ProductoEntity(nombre = "Plátanos", precioBase = 1200, tipoVenta = TipoVenta.PESO),
                     ProductoEntity(nombre = "Cebollas", precioBase = 1000, tipoVenta = TipoVenta.PESO),
-                    ProductoEntity(nombre = "Lechuga", precioBase = 800, tipoVenta = TipoVenta.UNIDAD),
-                    ProductoEntity(nombre = "Cilantro", precioBase = 500, tipoVenta = TipoVenta.UNIDAD)
+                    ProductoEntity(nombre = "Zanahorias", precioBase = 900, tipoVenta = TipoVenta.PESO),
+                    ProductoEntity(nombre = "Paltas", precioBase = 4500, tipoVenta = TipoVenta.PESO)
                 )
                 listaBase.forEach { productoDao.insertProducto(it) }
             }
         }
     }
 
-    fun agregarItem(producto: ProductoEntity, cantidad: Double) {
-        val subtotal = CalculadoraFeria.calcularSubtotal(producto.precioBase, cantidad)
-        val nuevoCarrito = _uiState.value.carrito + ItemCarrito(producto, cantidad, subtotal)
+    fun agregarItemConPrecio(producto: ProductoEntity, precioManual: Int, cantidad: Double) {
+        if (precioManual <= 0) return
+        val subtotal = CalculadoraFeria.calcularSubtotal(precioManual, cantidad)
+        val nuevoCarrito = _uiState.value.carrito + ItemCarrito(producto, precioManual, cantidad, subtotal)
         recalcularTotales(nuevoCarrito, _uiState.value.montoPagado)
     }
 
@@ -109,7 +110,7 @@ class CompraViewModel(application: Application) : AndroidViewModel(application) 
                 DetalleCompraEntity(
                     sesionId = sesionId,
                     productoId = it.producto.id,
-                    precioUnitarioCobrado = it.producto.precioBase,
+                    precioUnitarioCobrado = it.precioCobrado,
                     cantidad = it.cantidad,
                     subtotal = it.subtotal
                 )
@@ -122,4 +123,14 @@ class CompraViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
     }
+
+    fun sumarAlPago(monto: Int) {
+        val nuevoMonto = _uiState.value.montoPagado + monto
+        recalcularTotales(_uiState.value.carrito, nuevoMonto)
+    }
+
+    fun limpiarPago() {
+        recalcularTotales(_uiState.value.carrito, 0)
+    }
+
 }
