@@ -39,6 +39,12 @@ dependencies {
     // ViewModel Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
+    // Navegación en Jetpack Compose
+    implementation("androidx.navigation:navigation-compose:2.8.0")
+
+    // Íconos extendidos de Material 3 (para tener recibos, historial, etc.)
+    implementation("androidx.compose.material:material-icons-extended")
+
     // Dependencias habituales
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
