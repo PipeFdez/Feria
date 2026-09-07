@@ -373,7 +373,7 @@ fun CompraScreen(viewModel: CompraViewModel) {
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    val denominaciones = listOf(50, 100, 500, 1000, 2000, 5000, 10000, 20000)
+                    val denominaciones = listOf(50, 100, 500, 1000, 2000, 5000)
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -383,8 +383,7 @@ fun CompraScreen(viewModel: CompraViewModel) {
                                 onClick = { viewModel.sumarAlPago(valor) },
                                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
                             ) {
-                                val etiqueta = if (valor < 1000) "$valor" else "${valor / 1000}k"
-                                Text("+$etiqueta", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text("$$valor", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }

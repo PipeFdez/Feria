@@ -1,5 +1,6 @@
 package com.example.aplicacion_feria.ui.screens
 
+import com.example.aplicacion_feria.R
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -48,17 +49,52 @@ class CompraViewModel(application: Application) : AndroidViewModel(application) 
         precargarProductosSiEsNecesario()
     }
 
+
+
     private fun precargarProductosSiEsNecesario() {
         viewModelScope.launch(Dispatchers.IO) {
             val existentes = productoDao.getAllProductos().first()
             if (existentes.isEmpty()) {
+                val packageName = getApplication<Application>().packageName
+                fun getResourceUri(resourceId: Int) = "android.resource://$packageName/$resourceId"
+
                 val listaBase = listOf(
-                    ProductoEntity(nombre = "Tomates", precioBase = 1500, tipoVenta = TipoVenta.PESO),
-                    ProductoEntity(nombre = "Papas", precioBase = 1000, tipoVenta = TipoVenta.PESO),
-                    ProductoEntity(nombre = "Plátanos", precioBase = 1200, tipoVenta = TipoVenta.PESO),
-                    ProductoEntity(nombre = "Cebollas", precioBase = 1000, tipoVenta = TipoVenta.PESO),
-                    ProductoEntity(nombre = "Zanahorias", precioBase = 900, tipoVenta = TipoVenta.PESO),
-                    ProductoEntity(nombre = "Paltas", precioBase = 4500, tipoVenta = TipoVenta.PESO)
+                    ProductoEntity(
+                        nombre = "Tomates",
+                        precioBase = 1500,
+                        tipoVenta = TipoVenta.PESO,
+                        imagenUri = getResourceUri(R.drawable.tomate)
+                    ),
+                    ProductoEntity(
+                        nombre = "Patatas",
+                        precioBase = 1000,
+                        tipoVenta = TipoVenta.PESO,
+                        imagenUri = getResourceUri(R.drawable.patata)
+                    ),
+                    ProductoEntity(
+                        nombre = "Plátanos",
+                        precioBase = 1200,
+                        tipoVenta = TipoVenta.PESO,
+                        imagenUri = getResourceUri(R.drawable.platanos)
+                    ),
+                    ProductoEntity(
+                        nombre = "Cebollas",
+                        precioBase = 1000,
+                        tipoVenta = TipoVenta.PESO,
+                        imagenUri = getResourceUri(R.drawable.cebolla)
+                    ),
+                    ProductoEntity(
+                        nombre = "Lechuga",
+                        precioBase = 800,
+                        tipoVenta = TipoVenta.PESO,
+                        imagenUri = getResourceUri(R.drawable.lechuga)
+                    ),
+                    ProductoEntity(
+                        nombre = "Cilantro",
+                        precioBase = 500,
+                        tipoVenta = TipoVenta.PESO,
+                        imagenUri = getResourceUri(R.drawable.cilantro)
+                    )
                 )
                 listaBase.forEach { productoDao.insertProducto(it) }
             }
