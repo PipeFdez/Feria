@@ -3,6 +3,7 @@ package com.example.aplicacion_feria.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -73,9 +74,10 @@ fun CompraScreen(viewModel: CompraViewModel) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
+                        // Cabecera con foto, nombre y BOTÓN DE CANCELAR (X)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             if (prod.imagenUri != null) {
                                 AsyncImage(
@@ -96,9 +98,27 @@ fun CompraScreen(viewModel: CompraViewModel) {
                                 }
                             }
 
+                            Spacer(modifier = Modifier.width(10.dp))
+
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(prod.nombre, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                Text("Elige porción base", fontSize = 12.sp)
+                                Text("Paso 1: Elige porción base", fontSize = 12.sp)
+                            }
+
+                            // Botón "X" para descartar/cerrar la selección si se tocó por error
+                            IconButton(
+                                onClick = {
+                                    productoSeleccionado = null
+                                    precioIngresado = ""
+                                    cantidadPorciones = 1
+                                    porcionBaseSeleccionada = 1.0
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Cancelar selección",
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
                             }
                         }
 
