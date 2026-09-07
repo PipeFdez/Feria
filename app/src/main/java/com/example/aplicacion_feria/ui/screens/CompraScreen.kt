@@ -219,7 +219,7 @@ fun CompraScreen(viewModel: CompraViewModel) {
             Text("Productos disponibles:", fontWeight = FontWeight.Bold, fontSize = 14.sp)
             LazyColumn(
                 modifier = Modifier
-                    .weight(0.40f)
+                    .weight(0.65f)
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
@@ -278,39 +278,60 @@ fun CompraScreen(viewModel: CompraViewModel) {
                 }
             }
 
-            // Canasta de Compras actual
-            Text("Canasta (${uiState.carrito.size} compras):", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            LazyColumn(
-                modifier = Modifier
-                    .weight(0.35f)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                itemsIndexed(uiState.carrito) { index, item ->
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+            // 3. Canasta de Compras (solo aparece si hay cosas agregadas para no robar pantalla)
+            if (uiState.carrito.isNotEmpty()) {
+                Text(
+                    text = "Canasta (${uiState.carrito.size} compras):",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(0.35f)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    itemsIndexed(uiState.carrito) { index, item ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
-                            Column {
-                                Text(item.producto.nombre, fontWeight = FontWeight.Bold)
-                                Text(
-                                    "${item.cantidad} kg = ${clpFormat.format(item.subtotal)}",
-                                    fontSize = 12.sp
-                                )
-                            }
-                            IconButton(onClick = { viewModel.removerItem(index) }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(item.producto.nombre, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                    val porcionTexto = when (item.cantidad) {
+                                        0.25 -> "1/4 kg"
+                                        0.5 -> "1/2 kg"
+                                        1.0 -> "1 kg"
+                                        else -> "${item.cantidad} kg"
+                                    }
+                                    Text(
+                                        "$porcionTexto = ${clpFormat.format(item.subtotal)}",
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.outline
+                                    )
+                                }
+                                IconButton(onClick = { viewModel.removerItem(index) }) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Eliminar",
+                                        tint = Color.Red,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
 
-// Panel de Totales, Monedas/Billetes Acumulativos y Vuelto
+            // 4. Panel de Totales, Monedas/Billetes Acumulativos y Vuelto
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = if (uiState.total > uiState.presupuestoMaximo) Color(0xFFFFEBEE) else MaterialTheme.colorScheme.surfaceVariant
@@ -318,7 +339,6 @@ fun CompraScreen(viewModel: CompraViewModel) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    // Total acumulado de la canasta
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -335,13 +355,12 @@ fun CompraScreen(viewModel: CompraViewModel) {
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Fila informativa del monto que llevas acumulado para pagar
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Pagas con: ${clpFormat.format(uiState.montoPagado)}", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text("Pagas con: ${clpFormat.format(uiState.montoPagado)}", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
                         if (uiState.montoPagado > 0) {
                             TextButton(
                                 onClick = { viewModel.limpiarPago() },
@@ -354,8 +373,7 @@ fun CompraScreen(viewModel: CompraViewModel) {
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // Selector desplazable con monedas y billetes chilenos
-                    val denominaciones = listOf(50, 100, 500, 1000, 2000, 5000)
+                    val denominaciones = listOf(50, 100, 500, 1000, 2000, 5000, 10000, 20000)
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -365,12 +383,12 @@ fun CompraScreen(viewModel: CompraViewModel) {
                                 onClick = { viewModel.sumarAlPago(valor) },
                                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
                             ) {
-                                Text("$"+"$valor", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                val etiqueta = if (valor < 1000) "$valor" else "${valor / 1000}k"
+                                Text("+$etiqueta", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
 
-                    // Visor de Vuelto
                     if (uiState.montoPagado > 0) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(
@@ -390,6 +408,7 @@ fun CompraScreen(viewModel: CompraViewModel) {
                 }
             }
 
+            // 5. Botón Finalizar
             Button(
                 onClick = { viewModel.guardarCompraFinal {} },
                 modifier = Modifier.fillMaxWidth(),
